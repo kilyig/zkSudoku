@@ -1,0 +1,60 @@
+// checks whether num is a valid value for a "`bound` by `bound`" sudoku board.
+def validateNumber(u32 num, u32 bound) -> bool {
+    return num != 0 && num <= bound;
+}
+
+// returns 0 for x in (1..4)
+def validateSet<N>(u32[N] set) -> bool {
+
+    // first check that all numbers make sense
+    for u32 i in 0..N {
+        assert(validateNumber(set[i], N));
+    }
+
+    // then verify that each number appears exactly once
+    u32[N] mut occurrences = [0; N];
+    for u32 i in 0..N {
+        occurrences[set[i]-1] = occurrences[set[i]-1] + 1;
+    }
+    for u32 i in 0..N {
+        assert(occurrences[i] == 1);
+    }
+
+    return true;
+}
+
+def main(u32[4][4] puzzle, private u32[4][4] solution) -> bool {
+    u32 N = 4;
+
+    // check the rows
+    for u32 i in 0..N {
+        assert(validateSet(solution[i]));
+    }
+
+    // check the columns
+    for u32 i in 0..N {
+        u32[N] mut column = [0; N];
+        for u32 j in 0..N {
+            column[j] = solution[j][i];
+        }
+        assert(validateSet(column));
+    }
+
+    // TODO: check the smaller boxes
+
+    // check whether the prefilled boxes are the same
+    bool mut all_match = false;
+    for u32 i in 0..N {
+        for u32 j in 0..N {
+            bool prefilled_ok = if puzzle[i][j] == 0 {
+                true
+            } else {
+                solution[i][j] == puzzle[i][j]
+            };
+                
+            all_match = all_match && prefilled_ok;
+        }
+    }
+
+    return all_match;
+}

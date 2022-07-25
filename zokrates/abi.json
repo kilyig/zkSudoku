@@ -1,0 +1,33 @@
+{
+  "inputs": [
+    {
+      "name": "puzzle",
+      "public": true,
+      "type": "array",
+      "components": {
+        "size": 4,
+        "type": "array",
+        "components": {
+          "size": 4,
+          "type": "u32"
+        }
+      }
+    },
+    {
+      "name": "solution",
+      "public": false,
+      "type": "array",
+      "components": {
+        "size": 4,
+        "type": "array",
+        "components": {
+          "size": 4,
+          "type": "u32"
+        }
+      }
+    }
+  ],
+  "output": {
+    "type": "bool"
+  }
+}
