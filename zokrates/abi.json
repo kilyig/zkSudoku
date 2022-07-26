@@ -1,7 +1,7 @@
 {
   "inputs": [
     {
-      "name": "puzzle",
+      "name": "unsolved",
       "public": true,
       "type": "array",
       "components": {
@@ -14,7 +14,7 @@
       }
     },
     {
-      "name": "solution",
+      "name": "solved",
       "public": false,
       "type": "array",
       "components": {
@@ -28,6 +28,9 @@
     }
   ],
   "output": {
-    "type": "bool"
+    "type": "tuple",
+    "components": {
+      "elements": []
+    }
   }
 }
