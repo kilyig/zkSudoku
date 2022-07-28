@@ -25,7 +25,11 @@ zokrates verify
 ```
 
 ## Circom guide
-Coming soon.
+```
+# Compile the circuit
+circom sudoku.circom --r1cs --wasm --sym --c
+
+```
 
 ### Related Work
 https://github.com/akosba/xjsnark/tree/master/doc/code_previews#sudoku-9x9
