@@ -13,7 +13,7 @@ template Sudoku(sqrtN, N) {
             numbersVerifier.in[i*N + j] <== solved[i][j];
         }
     }
-    numbersVerifier.out === 0;
+    numbersVerifier.out === 1;
 
     
     // verify the rows
@@ -23,7 +23,7 @@ template Sudoku(sqrtN, N) {
         for (var j = 0; j < N; j++) {
             rowVerifiers[i].in[j] <== solved[i][j];
         }
-        rowVerifiers[i].out === 0;
+        rowVerifiers[i].out === 1;
     }
 
     // verify the columns
@@ -33,7 +33,7 @@ template Sudoku(sqrtN, N) {
         for (var j = 0; j < N; j++) {
             columnVerifiers[i].in[j] <== solved[j][i];
         }
-        columnVerifiers[i].out === 0;
+        columnVerifiers[i].out === 1;
     }
 
     // verify the boxes
@@ -57,7 +57,7 @@ template Sudoku(sqrtN, N) {
                 }
             }
 
-            boxVerifiers[boxIndex].out === 0;
+            boxVerifiers[boxIndex].out === 1;
         }
     }
 
@@ -77,9 +77,9 @@ template Sudoku(sqrtN, N) {
             isEquals[i][j].out === 1 - isZeros[i][j].out;
         }
     }
-
 }
 
+// returns 1 iff the N input signals are numbers from 1 to N without any repetitions 
 template SubgroupVerifier(N) {
     signal input in[N];
     signal output out;
@@ -89,23 +89,22 @@ template SubgroupVerifier(N) {
     for (var i = 0; i < N; i++) {
         numberVerifier[i] = NumberVerifier(N);
         numberVerifier[i].in <== in[i];
-        numberVerifier[i].out === 0;
+        numberVerifier[i].out === 1;
     }    
 
     // initialize the occurrences array
     var occurrences[N];
-    //for (var i = 0; i < N; i++) {
-    //    occurrences[i] = 0;
-    //}
+    for (var i = 0; i < N; i++) {
+        occurrences[i] = 0;
+    }
 
     // count the occurrences
     for (var i = 0; i < N; i++) {
-        occurrences[in[i]] = 1;
+        occurrences[in[i]-1] += 1;
     }
 
-
     // each number must occur exactly once
-    // TODO: check if the <-- below is dangerous: https://docs.circom.io/circom-language/constraint-generation/
+    // TODO: check if the <-- below is dangerous (I don't think so): https://docs.circom.io/circom-language/constraint-generation/
     component zeroCheckers[N];
     signal occ[N];
     for (var i = 0; i < N; i++) {
@@ -113,10 +112,13 @@ template SubgroupVerifier(N) {
         occ[i] <-- occurrences[i];
         zeroCheckers[i].in[0] <== occ[i];
         zeroCheckers[i].in[1] <== 1;
-        zeroCheckers[i].out === 0;
+        zeroCheckers[i].out === 1;
     }
+
+    out <== 1;
 }
 
+// returns 1 iff 1 <= in <= N
 template NumberVerifier(N) {
     signal input in;
     signal output out;
@@ -140,6 +142,8 @@ template NumberVerifier(N) {
     out <== equal.out;
 }
 
+// receives all numbers on a N by N sudoku board and verifies that each
+// value on the board satisfies 1 <= value <= N
 template SudokuNumberVerifier(N) {
     signal input in[N*N];
     signal output out;
@@ -148,11 +152,11 @@ template SudokuNumberVerifier(N) {
     for (var i = 0; i < N*N; i++) {
            numberVerifiers[i] = NumberVerifier(N);
            numberVerifiers[i].in <== in[i];
-           numberVerifiers[i].out === 0;
+           numberVerifiers[i].out === 1;
     }
 
-    out <== 0;
+    out <== 1;
 }
 
 
-component main {public [unsolved]} = Sudoku(2, 4);
+component main {public [unsolved]} = Sudoku(3, 9);
