@@ -1,7 +1,7 @@
 pragma circom 2.0.0;
 include "../node_modules/circomlib/circuits/comparators.circom";
 
-template Sudoku(N) {
+template Sudoku(sqrtN, N) {
     signal input unsolved[N][N];
     signal input solved[N][N];
     signal output out;
@@ -37,9 +37,47 @@ template Sudoku(N) {
     }
 
     // verify the boxes
+    component boxVerifiers[N];
+    // i and j iterate through the boxes
+    // k and m iterate through the entries in each box
+    for (var i = 0; i < sqrtN; i++) {
+        for (var j = 0; j < sqrtN; j++) {
+            var xTopLeftCorner = i*sqrtN;
+            var yTopLeftCorner = j*sqrtN;
 
+            // fill the verifier with the numbers in the box 
+            var boxIndex = i*sqrtN + j;
+            boxVerifiers[boxIndex] = SubgroupVerifier(N);
+            for (var k = 0; k < sqrtN; k++) {
+                for (var m = 0; m < sqrtN; m++) {
+                    var x = xTopLeftCorner + k;
+                    var y = yTopLeftCorner + m;
+                    var indexInBox = k*sqrtN + m;
+                    boxVerifiers[boxIndex].in[indexInBox] <== solved[x][y];
+                }
+            }
+
+            boxVerifiers[boxIndex].out === 0;
+        }
+    }
 
     // verify that solved solves unsolved
+    // NOTE: idea stolen from https://github.com/vplasencia/zkSudoku/blob/main/circuits/sudoku/sudoku.circom
+    component isEquals[N][N];
+    component isZeros[N][N];
+    for (var i = 0; i < N; i++) {
+        for (var j = 0; j < N; j++) {
+            isEquals[i][j] = IsEqual();
+            isEquals[i][j].in[0] <== solved[i][j];
+            isEquals[i][j].in[1] <== unsolved[i][j];
+
+            isZeros[i][j] = IsZero();
+            isZeros[i][j].in <== unsolved[i][j];
+
+            isEquals[i][j].out === 1 - isZeros[i][j].out;
+        }
+    }
+
 }
 
 template SubgroupVerifier(N) {
@@ -77,7 +115,6 @@ template SubgroupVerifier(N) {
         zeroCheckers[i].in[1] <== 1;
         zeroCheckers[i].out === 0;
     }
-
 }
 
 template NumberVerifier(N) {
@@ -118,4 +155,4 @@ template SudokuNumberVerifier(N) {
 }
 
 
-component main {public [unsolved]} = Sudoku(4);
+component main {public [unsolved]} = Sudoku(2, 4);
